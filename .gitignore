@@ -45,3 +45,6 @@ fabric.properties
 # MacOS
 .DS_Store
 
+
+/.bsp/
+target/
