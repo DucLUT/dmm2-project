@@ -9,9 +9,9 @@ lazy val root = (project in file("."))
   .settings(
     name := "dmm2-project",
     libraryDependencies ++= Seq(
-      // Add your library dependencies here
-      "org.json4s" %% "json4s-native" % "4.0.0",  // Example library dependency
-      "com.typesafe.akka" %% "akka-actor" % "2.6.16" // Another example library dependency
+      "org.json4s" %% "json4s-native" % "4.0.0",
+      "com.typesafe.akka" %% "akka-actor" % "2.6.16",
+      "com.github.tototoshi" %% "scala-csv" % "1.3.8"
     ),
     libraryDependencies += munit % Test
   )
