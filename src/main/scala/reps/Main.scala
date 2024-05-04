@@ -34,7 +34,7 @@ object Main {
   // Function to execute the selected menu option
   private def executeOption(option: MenuOption): Unit = option match {
     case ViewPowerPlantData => choice()
-    case AnalyzeEnergyGenerationData => println(analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv"))
+    case AnalyzeEnergyGenerationData => println(analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv").map(_.mkString(", ")).mkString("\n"))
     case GenerateAlerts => println("Generate Alerts")
     case Exit => println("Exiting...")
   }
