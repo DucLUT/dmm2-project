@@ -14,6 +14,7 @@ object Main {
     val key = try source.mkString finally source.close()
     key
   }
+
   def main(args: Array[String]): Unit = {
     val ApiKey = getKey
     println(ApiKey)
