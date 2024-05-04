@@ -12,7 +12,6 @@ object PowerPlantView {
     header :: tail.sortBy(row => LocalDateTime.parse(row.head, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")))
   }
 
-
   private def sortByValue(data: List[List[String]]): List[List[String]] = {
     val header :: tail = data
     header :: tail.sortBy(row => row.last.toDouble)
@@ -49,10 +48,11 @@ object PowerPlantView {
   }
 
   def choice(): Unit = {
-    println("What option do you want to view?")
+    println("Which data do you want to view?")
     println("1. Solar")
     println("2. Wind")
     println("3. Hydro")
+    println("4. All")
     print("Enter your choice: ")
 
     scala.io.StdIn.readInt() match {
@@ -89,6 +89,14 @@ object PowerPlantView {
           case _ => None
         }
         displayData("data/hydro.csv", sortBy)
+      case 4 =>
+        println("Solar Data:")
+        displayData("data/solar.csv", Some("timestamp"))
+        println("\nWind Data:")
+        displayData("data/wind.csv", Some("timestamp"))
+        println("\nHydro Data:")
+        displayData("data/hydro.csv", Some("timestamp"))
+
       case _ => println("Invalid choice")
     }
   }
