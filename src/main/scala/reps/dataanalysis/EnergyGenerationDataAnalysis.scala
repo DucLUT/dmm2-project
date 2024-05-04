@@ -30,15 +30,20 @@ object EnergyGenerationDataAnalysis {
   @tailrec
   private def insertionSortHelper(data: Array[Double], currentIndex: Int): Array[Double] = {
     if (currentIndex >= data.length) data
-    else if (currentIndex == 0) insertionSortHelper(data, currentIndex + 1)
-    else insertionSortInserter(data, currentIndex - 1, data(currentIndex), 0)
+    else {
+      insertionSortInserter(data, currentIndex)
+      insertionSortHelper(data, currentIndex + 1)
+    }
   }
 
   @tailrec
-  private def insertionSortInserter(data: Array[Double], sortedPartIndex: Int, element: Double, currentIndex: Int): Array[Double] = {
-    if (currentIndex >= sortedPartIndex) data
-    else if (element <= data(currentIndex)) data.patch(currentIndex - 1, List(element), 0)
-    else insertionSortInserter(data, sortedPartIndex, element, currentIndex + 1)
+  private def insertionSortInserter(data: Array[Double], currentIndex: Int): Unit = {
+    if (currentIndex > 0 && data(currentIndex - 1) > data(currentIndex)) {
+      val temp = data(currentIndex)
+      data(currentIndex) = data(currentIndex - 1)
+      data(currentIndex - 1) = temp
+      insertionSortInserter(data, currentIndex - 1)
+    }
   }
 
   private def mean(data: Array[Double]): Double = {
@@ -71,6 +76,8 @@ object EnergyGenerationDataAnalysis {
 
   private def range(data: Array[Double]): Double = {
     val sortedData: Array[Double] = insertionSort(data)
+/*    print("sortedData: ")
+    println(sortedData.mkString(", "))*/
     sortedData.last - sortedData(0)
   }
 
@@ -87,7 +94,7 @@ object EnergyGenerationDataAnalysis {
     val dataMidrange: Double = midrange(data)
 
     val statistics: Array[Double] = Array(dataMean, dataMedian, dataMode, dataRange, dataMidrange)
-    statistics
+    statistics.map(stat => BigDecimal(stat).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
   }
 
   def analyzeData(solarDataPath: String, windDataPath: String, hydroDataPath: String): List[Array[Double]] = {

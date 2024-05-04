@@ -38,7 +38,7 @@ object Main {
     // It will return the statistics as a List[Array[Double]], where each element in the list is an array of doubles,
     // representing the different statistics of each energy generation method in the following order:
     // (mean, median, mode, range, midrange)
-    case AnalyzeEnergyGenerationData => println(analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv"))
+    case AnalyzeEnergyGenerationData => println(analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv").map(_.mkString(", ")).mkString("\n"))
     case GenerateAlerts => println("Generate Alerts")
     case Exit => println("Exiting...")
   }

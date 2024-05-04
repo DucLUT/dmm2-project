@@ -22,7 +22,7 @@ object EnergyGenerationDataCollection {
 
   def fetchEnergyData(apiUrl: String, fileName: String): Unit = {
     val ApiKey = getKey
-    println(ApiKey)
+    // println(ApiKey)
 
 //    val date = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
 
