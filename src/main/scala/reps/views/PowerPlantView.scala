@@ -7,15 +7,29 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object PowerPlantView {
-  def displayPowerPlantData(): Unit = {
-    println("Power Plant Data")
+  private def sortByTimestamp(data: List[List[String]]): List[List[String]] = {
+    val header :: tail = data
+    header :: tail.sortBy(row => LocalDateTime.parse(row.head, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")))
   }
 
-  private def displayView(fileName: String): Unit = {
+
+  private def sortByValue(data: List[List[String]]): List[List[String]] = {
+    val header :: tail = data
+    header :: tail.sortBy(row => row.last.toDouble)
+  }
+
+  private def displayData(fileName: String, sortBy: Option[String]): Unit = {
     val file = new File(fileName)
     val reader = CSVReader.open(file)
-    val data = reader.all()
+    var data = reader.all()
     reader.close()
+
+    // Apply sorting if requested
+    sortBy match {
+      case Some("timestamp") => data = sortByTimestamp(data)
+      case Some("value") => data = sortByValue(data)
+      case _ => // No sorting
+    }
 
     // Display headers
     val headers = data.head.mkString("\t")
@@ -30,6 +44,10 @@ object PowerPlantView {
     }
   }
 
+  def displayPowerPlantData(): Unit = {
+    println("Power Plant Data")
+  }
+
   def choice(): Unit = {
     println("What option do you want to view?")
     println("1. Solar")
@@ -38,11 +56,40 @@ object PowerPlantView {
     print("Enter your choice: ")
 
     scala.io.StdIn.readInt() match {
-      case 1 => displayView("data/solar.csv")
-      case 2 => displayView("data/wind.csv")
-      case 3 => displayView("data/hydro.csv")
+      case 1 =>
+        println("Sorting options:")
+        println("1. Sort by timestamp")
+        println("2. Sort by value")
+        print("Enter your sorting choice: ")
+        val sortBy = scala.io.StdIn.readInt() match {
+          case 1 => Some("timestamp")
+          case 2 => Some("value")
+          case _ => None
+        }
+        displayData("data/solar.csv", sortBy)
+      case 2 =>
+        println("Sorting options:")
+        println("1. Sort by timestamp")
+        println("2. Sort by value")
+        print("Enter your sorting choice: ")
+        val sortBy = scala.io.StdIn.readInt() match {
+          case 1 => Some("timestamp")
+          case 2 => Some("value")
+          case _ => None
+        }
+        displayData("data/wind.csv", sortBy)
+      case 3 =>
+        println("Sorting options:")
+        println("1. Sort by timestamp")
+        println("2. Sort by value")
+        print("Enter your sorting choice: ")
+        val sortBy = scala.io.StdIn.readInt() match {
+          case 1 => Some("timestamp")
+          case 2 => Some("value")
+          case _ => None
+        }
+        displayData("data/hydro.csv", sortBy)
       case _ => println("Invalid choice")
     }
   }
 }
-
