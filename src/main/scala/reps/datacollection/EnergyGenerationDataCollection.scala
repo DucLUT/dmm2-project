@@ -1,19 +1,23 @@
 package reps.datacollection
-
+import java.io.File
 import java.net.{HttpURLConnection, URL}
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.FileWriter
 import org.json4s._
 import org.json4s.native.JsonMethods._
-
+import akka.actor.ActorSystem
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
+import scala.io.Source
 // Duc Duong
 // Mattias Slotte
 // Mengshi Qi
 
 object EnergyGenerationDataCollection {
   implicit val formats: DefaultFormats.type = DefaultFormats
-
+  private var csvCreated = false
   private def getKey: String = {
     val source = scala.io.Source.fromFile("src/main/scala/reps/.env")
     val key = try source.mkString finally source.close()
@@ -22,21 +26,12 @@ object EnergyGenerationDataCollection {
 
   def fetchEnergyData(apiUrl: String, fileName: String): Unit = {
     val ApiKey = getKey
-    // println(ApiKey)
-
-//    val date = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-
-//    val apiTestUrl = "https://data.fingrid.fi/api/datasets/75/data"
-//    val apiHydroUrl = "https://data.fingrid.fi/api/datasets/191/data"
-//    val apiSolarUrl = "https://data.fingrid.fi/api/datasets/248/data"
-//    val apiWindUrl = "https://data.fingrid.fi/api/datasets/181/data"
-
     val url = new URL(apiUrl)
     val conn = url.openConnection().asInstanceOf[HttpURLConnection]
 
     conn.setRequestMethod("GET")
     conn.setRequestProperty("Cache-Control", "no-cache")
-    conn.setRequestProperty("x-api-key",ApiKey)
+    conn.setRequestProperty("x-api-key", ApiKey)
 
     val responseCode = conn.getResponseCode
     if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -52,18 +47,38 @@ object EnergyGenerationDataCollection {
       val json = parse(response.toString)
       val data = (json \ "data").extract[List[JValue]]
       val filePath = s"data/$fileName"
-      val csvFile = new FileWriter(filePath)
-      csvFile.write("startTime,endTime,value\n")
-      data.foreach { item =>
-        val startTime = (item \ "startTime").extract[String]
-        val endTime = (item \ "endTime").extract[String]
-        val value = (item \ "value").extract[Double]
-        csvFile.write(s"$startTime,$endTime,$value\n")
+
+      val file = new File(filePath)
+      val fileExists = file.exists()
+
+      val csvFile = new FileWriter(filePath, true) // Append mode
+
+      if (!fileExists) {
+        csvFile.write("startTime,endTime,value\n") // Write header if the file is newly created
       }
+
+      // Read existing data from the file
+      val existingData = if (fileExists) Source.fromFile(filePath).getLines().toSet else Set.empty[String]
+
+      // Append new data only if it's not already present in the file
+      data.foreach { item =>
+        val dataLine = s"${(item \ "startTime").extract[String]},${(item \ "endTime").extract[String]},${(item \ "value").extract[Double]}"
+        if (!existingData.contains(dataLine)) {
+          csvFile.write(s"$dataLine\n") // Append new data to the file
+        }
+      }
+
       csvFile.close()
-      println("CSV file created successfully.")
+
+      if (fileExists) {
+//        println("New data appended to the CSV file.")
+      } else {
+        println("CSV file created successfully.")
+      }
     } else {
       println(s"Failed to retrieve data. Response code: $responseCode")
     }
   }
+
+
 }

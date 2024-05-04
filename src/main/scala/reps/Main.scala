@@ -1,10 +1,15 @@
 package reps
+import akka.actor.ActorSystem
 
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 import reps.datacollection.EnergyGenerationDataCollection.fetchEnergyData
 import reps.views.PowerPlantView.choice
 import reps.dataanalysis.EnergyGenerationDataAnalysis.analyzeData
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.annotation.tailrec
+import scala.language.postfixOps
 
 //Duc Duong
 //Mattias Slotte
@@ -60,22 +65,31 @@ object Main {
 
   // Main function to start the application
   def main(args: Array[String]): Unit = {
+    val system = ActorSystem("RenewableEnergyManagementSystem")
     val dataFetches = Seq(
-      "https://data.fingrid.fi/api/datasets/191/data" -> "hydro.csv",
-      "https://data.fingrid.fi/api/datasets/248/data" -> "solar.csv",
-      "https://data.fingrid.fi/api/datasets/75/data" -> "wind.csv"
-    )
-
-    dataFetches.foreach { case (url, fileName) =>
-      fetchEnergyData(url, fileName)
+        "https://data.fingrid.fi/api/datasets/191/data" -> "hydro.csv",
+        "https://data.fingrid.fi/api/datasets/248/data" -> "solar.csv",
+        "https://data.fingrid.fi/api/datasets/75/data" -> "wind.csv"
+      )
+    val fetchFirst = Future {
+      dataFetches.foreach { case (url, fileName) =>
+        fetchEnergyData(url, fileName)
+      }
     }
+    Await.result(fetchFirst, Duration.Inf)
 
+    system.scheduler.scheduleAtFixedRate(initialDelay = 15.minutes, interval = 15.minutes) { () =>
+      dataFetches.foreach { case (url, fileName) =>
+        fetchEnergyData(url, fileName)
+      }
+    }
     var continue = true
     while (continue) {
       displayMenu()
       val option = getUserChoice
       if (option == Exit) {
         continue = false
+        system.terminate()
       } else {
         executeOption(option)
       }
