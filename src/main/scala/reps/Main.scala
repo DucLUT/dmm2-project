@@ -2,12 +2,25 @@ package reps
 
 import reps.datacollection.EnergyGenerationDataCollection.fetchEnergyData
 import reps.views.PowerPlantView.choice
-// Duc Duong
-// Mattias Slotte
-// Mengshi Qi
+
+//Duc Duong
+//Mattias Slotte
+//Mengshi Qi
+
+// Define a sealed trait to represent the menu options
+sealed trait MenuOption
+object MenuOption {
+  case object ViewPowerPlantData extends MenuOption
+  case object AnalyzeEnergyGenerationData extends MenuOption
+  case object GenerateAlerts extends MenuOption
+  case object Exit extends MenuOption
+}
 
 object Main {
-  def menu(): Unit = {
+  import MenuOption._
+
+  // Function to display the menu options
+  def displayMenu(): Unit = {
     println("1. View Power Plant Data")
     println("2. Analyze Energy Generation Data")
     println("3. Generate Alerts")
@@ -15,29 +28,49 @@ object Main {
     print("Enter your choice: ")
   }
 
-  def executeOption(option: Int): Unit = {
-    option match {
-      case 1 => choice()
-      case _ => println("Invalid choice")
+  // Function to execute the selected menu option
+  def executeOption(option: MenuOption): Unit = option match {
+    case ViewPowerPlantData => choice()
+    case AnalyzeEnergyGenerationData => println("Analyzing Energy Generation Data")
+    case GenerateAlerts => println("Generate Alerts")
+    case Exit => println("Exiting...")
+  }
+
+  // Function to get user input as a menu option
+  def getUserChoice(): MenuOption = {
+    val choice = scala.io.StdIn.readInt()
+    choice match {
+      case 1 => ViewPowerPlantData
+      case 2 => AnalyzeEnergyGenerationData
+      case 3 => GenerateAlerts
+      case 4 => Exit
+      case _ =>
+        println("Invalid choice. Please enter a valid option.")
+        getUserChoice()
     }
   }
-  def main(args: Array[String]): Unit = {
 
-    fetchEnergyData("https://data.fingrid.fi/api/datasets/191/data", "hydro.csv")
-    fetchEnergyData("https://data.fingrid.fi/api/datasets/248/data", "solar.csv")
-    fetchEnergyData("https://data.fingrid.fi/api/datasets/75/data", "wind.csv")
+  // Main function to start the application
+  def main(args: Array[String]): Unit = {
+    val dataFetches = Seq(
+      "https://data.fingrid.fi/api/datasets/191/data" -> "hydro.csv",
+      "https://data.fingrid.fi/api/datasets/248/data" -> "solar.csv",
+      "https://data.fingrid.fi/api/datasets/75/data" -> "wind.csv"
+    )
+
+    dataFetches.foreach { case (url, fileName) =>
+      fetchEnergyData(url, fileName)
+    }
 
     var continue = true
     while (continue) {
-      menu()
-      val option = scala.io.StdIn.readInt()
-      if (option == 4) {
+      displayMenu()
+      val option = getUserChoice()
+      if (option == Exit) {
         continue = false
       } else {
         executeOption(option)
       }
     }
-
-
   }
 }
