@@ -34,6 +34,10 @@ object Main {
   // Function to execute the selected menu option
   private def executeOption(option: MenuOption): Unit = option match {
     case ViewPowerPlantData => choice()
+    // To use analyzeData, insert the paths to the solar, wind and hydro data in the order (solar, wind, hydro).
+    // It will return the statistics as a List[Array[Double]], where each element in the list is an array of doubles,
+    // representing the different statistics of each energy generation method in the following order:
+    // (mean, median, mode, range, midrange)
     case AnalyzeEnergyGenerationData => println(analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv"))
     case GenerateAlerts => println("Generate Alerts")
     case Exit => println("Exiting...")
