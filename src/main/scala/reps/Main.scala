@@ -8,6 +8,11 @@ import reps.datacollection.EnergyGenerationDataCollection.fetchEnergyData
 
 object Main {
   def main(args: Array[String]): Unit = {
-    fetchEnergyData()
+
+    fetchEnergyData("https://data.fingrid.fi/api/datasets/191/data", "hydro.csv")
+    fetchEnergyData("https://data.fingrid.fi/api/datasets/248/data", "solar.csv")
+    fetchEnergyData("https://data.fingrid.fi/api/datasets/75/data", "wind.csv")
+
+
   }
 }

@@ -24,18 +24,18 @@ object EnergyGenerationDataCollection {
     key
   }
 
-  def fetchEnergyData(): Unit = {
+  def fetchEnergyData(apiUrl: String, fileName: String): Unit = {
     val ApiKey = getKey
     println(ApiKey)
 
-    val date = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+//    val date = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
 
-    val apiTestUrl = "https://data.fingrid.fi/api/datasets/75/data"
-    val apiHydroUrl = "https://data.fingrid.fi/api/datasets/191/data"
-    val apiSolarUrl = "https://data.fingrid.fi/api/datasets/248/data"
-    val apiWindUrl = "https://data.fingrid.fi/api/datasets/181/data"
+//    val apiTestUrl = "https://data.fingrid.fi/api/datasets/75/data"
+//    val apiHydroUrl = "https://data.fingrid.fi/api/datasets/191/data"
+//    val apiSolarUrl = "https://data.fingrid.fi/api/datasets/248/data"
+//    val apiWindUrl = "https://data.fingrid.fi/api/datasets/181/data"
 
-    val url = new URL(apiTestUrl)
+    val url = new URL(apiUrl)
     val conn = url.openConnection().asInstanceOf[HttpURLConnection]
 
     conn.setRequestMethod("GET")
@@ -55,7 +55,8 @@ object EnergyGenerationDataCollection {
 
       val json = parse(response.toString)
       val data = (json \ "data").extract[List[JValue]]
-      val csvFile = new FileWriter("data.csv")
+      val filePath = s"data/$fileName"
+      val csvFile = new FileWriter(filePath)
       csvFile.write("startTime,endTime,value\n")
       data.foreach { item =>
         val startTime = (item \ "startTime").extract[String]
