@@ -1,4 +1,4 @@
-package example
+package reps
 
 import java.net.{HttpURLConnection, URL}
 import java.io.BufferedReader
