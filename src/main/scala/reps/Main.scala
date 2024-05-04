@@ -7,7 +7,7 @@ import reps.datacollection.EnergyGenerationDataCollection.fetchEnergyData
 import reps.views.PowerPlantView.choice
 import reps.dataanalysis.EnergyGenerationDataAnalysis.analyzeData
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import reps.control.RenewableControl._
 import scala.annotation.tailrec
 import scala.language.postfixOps
 
@@ -21,6 +21,7 @@ object MenuOption {
   case object ViewPowerPlantData extends MenuOption
   case object AnalyzeEnergyGenerationData extends MenuOption
   case object GenerateAlerts extends MenuOption
+  case object ControlRenewablePlants extends MenuOption
   case object Exit extends MenuOption
 }
 
@@ -32,10 +33,10 @@ object Main {
     println("1. View Power Plant Data")
     println("2. Analyze Energy Generation Data")
     println("3. Generate Alerts")
-    println("4. Exit")
+    println("4. Control Renewable Plants")
+    println("5. Exit")
     print("Enter your choice: ")
   }
-
   // Function to execute the selected menu option
   private def executeOption(option: MenuOption): Unit = option match {
     case ViewPowerPlantData => choice()
@@ -45,6 +46,7 @@ object Main {
     // (mean, median, mode, range, midrange)
     case AnalyzeEnergyGenerationData => println(analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv").map(_.mkString(", ")).mkString("\n"))
     case GenerateAlerts => println("Generate Alerts")
+    case ControlRenewablePlants => runRenewableControlApp()
     case Exit => println("Exiting...")
   }
 
@@ -56,12 +58,14 @@ object Main {
       case 1 => ViewPowerPlantData
       case 2 => AnalyzeEnergyGenerationData
       case 3 => GenerateAlerts
-      case 4 => Exit
+      case 4 => ControlRenewablePlants
+      case 5 => Exit
       case _ =>
         println("Invalid choice. Please enter a valid option.")
         getUserChoice
     }
   }
+
 
   // Main function to start the application
   def main(args: Array[String]): Unit = {

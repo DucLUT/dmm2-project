@@ -42,11 +42,23 @@ object RenewableControl {
     }
   }
 
+  // Renewable plant instance for Hydro
+  implicit val hydroPlant: RenewablePlant[Hydro] = new RenewablePlant[Hydro] {
+    def shutdown(plant: Hydro): Hydro = {
+      println("Shutting down hydro plant...")
+      // Additional shutdown logic can be added here
+      plant.copy(running = false)
+    }
+  }
+
   // Wind plant case class
   case class Wind(name: String, running: Boolean = true)
 
   // Solar plant case class
   case class Solar(name: String, running: Boolean = true)
+
+  // Hydro plant case class
+  case class Hydro(name: String, running: Boolean = true)
 
   // Function to interact with a specific renewable plant based on user choice
   def interactPlant[A](plant: A)(implicit renewablePlant: RenewablePlant[A], functor: Functor[Option]): Option[A] = {
@@ -63,23 +75,26 @@ object RenewableControl {
     }
   }
 
-  // Main function to demonstrate the application
-  def main(args: Array[String]): Unit = {
-    // Creating wind and solar plants
+  // Run the Renewable Control application
+  def runRenewableControlApp(): Unit = {
+    // Creating wind, solar, and hydro plants
     val windPlant = Wind("Wind Plant")
     val solarPlant = Solar("Solar Plant")
+    val hydroPlant = Hydro("Hydro Plant")
 
     // User interaction
     println("Choose a renewable plant to interact with:")
     println("1. Wind Plant")
     println("2. Solar Plant")
-    print("Enter your choice (1 or 2): ")
+    println("3. Hydro Plant")
+    print("Enter your choice (1, 2, or 3): ")
 
     // Reading user input
     val userInput = scala.io.StdIn.readInt()
     val result = userInput match {
       case 1 => interactPlant(windPlant)
       case 2 => interactPlant(solarPlant)
+      case 3 => interactPlant(hydroPlant)
       case _ => None
     }
 
