@@ -16,6 +16,7 @@ object Main {
   }
   def main(args: Array[String]): Unit = {
     val ApiKey = getKey
+    println(ApiKey)
     val apiUrl = "https://data.fingrid.fi/api/notifications/active"
     val url = new URL(apiUrl)
     val conn = url.openConnection().asInstanceOf[HttpURLConnection]
