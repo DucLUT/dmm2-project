@@ -24,7 +24,7 @@ object EnergyGenerationDataCollection {
     key
   }
 
-  def fetchEnergyData: Unit = {
+  def fetchEnergyData(): Unit = {
     val ApiKey = getKey
     println(ApiKey)
 

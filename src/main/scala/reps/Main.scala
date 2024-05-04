@@ -8,6 +8,6 @@ import reps.datacollection.EnergyGenerationDataCollection.fetchEnergyData
 
 object Main {
   def main(args: Array[String]): Unit = {
-    fetchEnergyData
+    fetchEnergyData()
   }
 }
