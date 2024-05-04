@@ -50,3 +50,5 @@ fabric.properties
 target/
 
 .env
+
+.csv
