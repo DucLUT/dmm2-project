@@ -4,12 +4,8 @@ import java.net.{HttpURLConnection, URL}
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.FileWriter
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import org.json4s._
 import org.json4s.native.JsonMethods._
-
-import scala.annotation.unused
 
 // Duc Duong
 // Mattias Slotte

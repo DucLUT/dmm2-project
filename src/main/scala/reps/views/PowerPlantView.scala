@@ -1,6 +1,7 @@
 package reps.views
 
 import com.github.tototoshi.csv._
+
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -10,7 +11,7 @@ object PowerPlantView {
     println("Power Plant Data")
   }
 
-  def displayView(fileName: String): Unit = {
+  private def displayView(fileName: String): Unit = {
     val file = new File(fileName)
     val reader = CSVReader.open(file)
     val data = reader.all()
@@ -23,7 +24,7 @@ object PowerPlantView {
     // Display rows
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
     data.tail.foreach { row =>
-      val formattedRow = row.updated(0, LocalDateTime.parse(row(0), dateFormatter).format(DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm a")))
+      val formattedRow = row.updated(0, LocalDateTime.parse(row.head, dateFormatter).format(DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm a")))
         .updated(1, LocalDateTime.parse(row(1), dateFormatter).format(DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm a")))
       println(formattedRow.mkString("\t"))
     }

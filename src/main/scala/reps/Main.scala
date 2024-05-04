@@ -2,6 +2,9 @@ package reps
 
 import reps.datacollection.EnergyGenerationDataCollection.fetchEnergyData
 import reps.views.PowerPlantView.choice
+import reps.dataanalysis.EnergyGenerationDataAnalysis.analyzeData
+
+import scala.annotation.tailrec
 
 //Duc Duong
 //Mattias Slotte
@@ -20,7 +23,7 @@ object Main {
   import MenuOption._
 
   // Function to display the menu options
-  def displayMenu(): Unit = {
+  private def displayMenu(): Unit = {
     println("1. View Power Plant Data")
     println("2. Analyze Energy Generation Data")
     println("3. Generate Alerts")
@@ -29,15 +32,16 @@ object Main {
   }
 
   // Function to execute the selected menu option
-  def executeOption(option: MenuOption): Unit = option match {
+  private def executeOption(option: MenuOption): Unit = option match {
     case ViewPowerPlantData => choice()
-    case AnalyzeEnergyGenerationData => println("Analyzing Energy Generation Data")
+    case AnalyzeEnergyGenerationData => println(analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv"))
     case GenerateAlerts => println("Generate Alerts")
     case Exit => println("Exiting...")
   }
 
   // Function to get user input as a menu option
-  def getUserChoice(): MenuOption = {
+  @tailrec
+  private def getUserChoice: MenuOption = {
     val choice = scala.io.StdIn.readInt()
     choice match {
       case 1 => ViewPowerPlantData
@@ -46,7 +50,7 @@ object Main {
       case 4 => Exit
       case _ =>
         println("Invalid choice. Please enter a valid option.")
-        getUserChoice()
+        getUserChoice
     }
   }
 
@@ -65,7 +69,7 @@ object Main {
     var continue = true
     while (continue) {
       displayMenu()
-      val option = getUserChoice()
+      val option = getUserChoice
       if (option == Exit) {
         continue = false
       } else {
