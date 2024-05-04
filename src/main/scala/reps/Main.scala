@@ -9,17 +9,21 @@ import java.io.InputStreamReader
 // Mengshi Qi
 
 object Main {
+  def getKey: String = {
+    val source = scala.io.Source.fromFile("src/main/scala/reps/.env")
+    val key = try source.mkString finally source.close()
+    key
+  }
   def main(args: Array[String]): Unit = {
-    val API_KEY = "yourapikey"
-    val api_URL = "https://data.fingrid.fi/api/notifications/active"
-    val url = new URL(api_URL)
+    val ApiKey = getKey
+    val apiUrl = "https://data.fingrid.fi/api/notifications/active"
+    val url = new URL(apiUrl)
     val conn = url.openConnection().asInstanceOf[HttpURLConnection]
 
     conn.setRequestMethod("GET")
     conn.setRequestProperty("Cache-Control", "no-cache")
-    conn.setRequestProperty("x-api-key",API_KEY)
+    conn.setRequestProperty("x-api-key",ApiKey)
     val response = conn.getResponseCode
     println(response)
   }
-
 }
