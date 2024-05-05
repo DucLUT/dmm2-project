@@ -1,5 +1,6 @@
 # dmm2-project
  
+```mermaid
 sequenceDiagram
     participant Application as App
     participant Scheduler as Sched
