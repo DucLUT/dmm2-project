@@ -48,7 +48,7 @@ fabric.properties
 
 /.bsp/
 target/
-.bloop/*
+.bloop/
 .metals/
 .metals.bsp
 .env
