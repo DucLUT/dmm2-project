@@ -43,8 +43,15 @@ object PowerPlantView {
     }
   }
 
-  def displayPowerPlantData(): Unit = {
+/*  def displayPowerPlantData(): Unit = {
     println("Power Plant Data")
+  }*/
+
+  private def printSortingOptions(): Unit = {
+    println("Sorting options:")
+    println("1. Sort by timestamp")
+    println("2. Sort by value")
+    print("Enter your sorting choice: ")
   }
 
   def choice(): Unit = {
@@ -57,10 +64,7 @@ object PowerPlantView {
 
     scala.io.StdIn.readInt() match {
       case 1 =>
-        println("Sorting options:")
-        println("1. Sort by timestamp")
-        println("2. Sort by value")
-        print("Enter your sorting choice: ")
+        printSortingOptions()
         val sortBy = scala.io.StdIn.readInt() match {
           case 1 => Some("timestamp")
           case 2 => Some("value")
@@ -68,10 +72,7 @@ object PowerPlantView {
         }
         displayData("data/solar.csv", sortBy)
       case 2 =>
-        println("Sorting options:")
-        println("1. Sort by timestamp")
-        println("2. Sort by value")
-        print("Enter your sorting choice: ")
+        printSortingOptions()
         val sortBy = scala.io.StdIn.readInt() match {
           case 1 => Some("timestamp")
           case 2 => Some("value")
@@ -79,10 +80,7 @@ object PowerPlantView {
         }
         displayData("data/wind.csv", sortBy)
       case 3 =>
-        println("Sorting options:")
-        println("1. Sort by timestamp")
-        println("2. Sort by value")
-        print("Enter your sorting choice: ")
+        printSortingOptions()
         val sortBy = scala.io.StdIn.readInt() match {
           case 1 => Some("timestamp")
           case 2 => Some("value")

@@ -25,30 +25,24 @@ object RenewableControl {
   }
 
   // Renewable plant instance for Wind
-  implicit val windPlant: RenewablePlant[Wind] = new RenewablePlant[Wind] {
-    def shutdown(plant: Wind): Wind = {
-      println("Shutting down wind plant...")
-      // Additional shutdown logic can be added here
-      plant.copy(running = false)
-    }
+  implicit val windPlant: RenewablePlant[Wind] = (plant: Wind) => {
+    println("Shutting down wind plant...")
+    // Additional shutdown logic can be added here
+    plant.copy(running = false)
   }
 
   // Renewable plant instance for Solar
-  implicit val solarPlant: RenewablePlant[Solar] = new RenewablePlant[Solar] {
-    def shutdown(plant: Solar): Solar = {
-      println("Shutting down solar plant...")
-      // Additional shutdown logic can be added here
-      plant.copy(running = false)
-    }
+  implicit val solarPlant: RenewablePlant[Solar] = (plant: Solar) => {
+    println("Shutting down solar plant...")
+    // Additional shutdown logic can be added here
+    plant.copy(running = false)
   }
 
   // Renewable plant instance for Hydro
-  implicit val hydroPlant: RenewablePlant[Hydro] = new RenewablePlant[Hydro] {
-    def shutdown(plant: Hydro): Hydro = {
-      println("Shutting down hydro plant...")
-      // Additional shutdown logic can be added here
-      plant.copy(running = false)
-    }
+  implicit val hydroPlant: RenewablePlant[Hydro] = (plant: Hydro) => {
+    println("Shutting down hydro plant...")
+    // Additional shutdown logic can be added here
+    plant.copy(running = false)
   }
 
   // Wind plant case class
@@ -61,7 +55,7 @@ object RenewableControl {
   case class Hydro(name: String, running: Boolean = true)
 
   // Function to interact with a specific renewable plant based on user choice
-  def interactPlant[A](plant: A)(implicit renewablePlant: RenewablePlant[A], functor: Functor[Option]): Option[A] = {
+  private def interactPlant[A](plant: A)(implicit renewablePlant: RenewablePlant[A], functor: Functor[Option]): Option[A] = {
     println(s"Interacting with ${plant.getClass.getSimpleName}: ${plant.toString}")
     println("Performing shutdown operation...")
     val shutdownResult = Try(renewablePlant.shutdown(plant))

@@ -10,10 +10,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import reps.control.RenewableControl._
 import scala.annotation.tailrec
 import scala.language.postfixOps
+import java.text.{DecimalFormat, DecimalFormatSymbols}
+import java.util.Locale
 
 //Duc Duong
 //Mattias Slotte
 //Mengshi Qi
+
+
 
 // Define a sealed trait to represent the menu options
 sealed trait MenuOption
@@ -27,6 +31,9 @@ object MenuOption {
 
 object Main {
   import MenuOption._
+
+  private val symbols = new DecimalFormatSymbols(Locale.US)
+  private val formatter = new DecimalFormat("#.##", symbols)
 
   // Function to display the menu options
   private def displayMenu(): Unit = {
@@ -44,7 +51,19 @@ object Main {
     // It will return the statistics as a List[Array[Double]], where each element in the list is an array of doubles,
     // representing the different statistics of each energy generation method in the following order:
     // (mean, median, mode, range, midrange)
-    case AnalyzeEnergyGenerationData => println(analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv").map(_.mkString(", ")).mkString("\n"))
+    case AnalyzeEnergyGenerationData =>
+      val statisticsNames: Array[String] = Array("Mean", "Median", "Mode", "Range", "Midrange")
+      val datasetNames: Array[String] = Array("Solar", "Wind", "Hydro")
+
+      println()
+      analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv").zip(datasetNames).foreach { case (table, datasetName) =>
+        println(s"$datasetName Data:")
+        val formattedHeader = statisticsNames.map(name => String.format("%-10s", name)).mkString("\t")
+        println(formattedHeader)
+        val formattedRow = table.map(value => String.format("%-10s", formatter.format(value).toDouble)).mkString("\t")
+        println(formattedRow)
+        println()
+      }
     case GenerateAlerts => println("Generate Alerts")
     case ControlRenewablePlants => runRenewableControlApp()
     case Exit => println("Exiting...")
