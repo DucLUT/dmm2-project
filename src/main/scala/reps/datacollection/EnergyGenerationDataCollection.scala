@@ -1,4 +1,5 @@
 package reps.datacollection
+import scala.util.{Try, Success, Failure}
 import java.io.File
 import java.net.{HttpURLConnection, URL}
 import java.io.BufferedReader
@@ -15,16 +16,21 @@ import scala.language.postfixOps
 object EnergyGenerationDataCollection {
   implicit val formats: DefaultFormats.type = DefaultFormats
   // private var csvCreated = false
-  private def getKey: String = {
+  private def getKey: String = Try {
     val source = scala.io.Source.fromFile("src/main/scala/reps/.env")
-    val key = try source.mkString finally source.close()
-    key
+    try source.mkString finally source.close()
+  } getOrElse {
+    println("Error: Unable to read API key from .env file.")
+    ""
   }
+
 
   def fetchEnergyData(apiUrl: String, fileName: String): Unit = {
     val ApiKey = getKey
+    if (ApiKey.nonEmpty) {
     val url = new URL(apiUrl)
     val conn = url.openConnection().asInstanceOf[HttpURLConnection]
+
 
     conn.setRequestMethod("GET")
     conn.setRequestProperty("Cache-Control", "no-cache")
@@ -41,6 +47,14 @@ object EnergyGenerationDataCollection {
       }
       in.close()
 
+      processResponse(response.toString(), fileName)
+    } else {
+      println(s"Failed to retrieve data. Response code: $responseCode")
+    }
+    }
+
+
+def processResponse(response: String, fileName: String): Unit = try{
       val json = parse(response.toString)
       val data = (json \ "data").extract[List[JValue]]
       val filePath = s"data/$fileName"
@@ -74,14 +88,15 @@ object EnergyGenerationDataCollection {
 
       csvFile.close()
 
-      if (fileExists) {
-//        println("New data appended to the CSV file.")
-      } else {
-        println("CSV file created successfully.")
-      }
-    } else {
-      println(s"Failed to retrieve data. Response code: $responseCode")
-    }
+  if (!fileExists) {
+    println("CSV file created successfully.")
+  } else {
+    println("New data appended to the CSV file.")
+  }
+} catch {
+  case e: Exception =>
+    println(s"Error processing response or writing to file: ${e.getMessage}")
+}
   }
 
 
