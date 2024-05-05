@@ -1,72 +1,48 @@
+package reps.control
+
+// Importing Option type to handle possible absence of values
 import scala.util.{Try, Success, Failure}
-import scala.io.Source
-import java.io.{File, PrintWriter}
 
-
-
-object RenewableControl {
-
-  // Functor concept implementation
-  object Functor {
-    // Functor trait with map function
-    trait Functor[F[_]] {
-      def map[A, B](fa: F[A])(f: A => B): F[B]
-    }
-
-    // Functor instance for Option
-    implicit val optionFunctor: Functor[Option] = new Functor[Option] {
-      def map[A, B](fa: Option[A])(f: A => B): Option[B] = fa.map(f)
-    }
+// Functor concept implementation
+object Functor {
+  // Functor trait with map function
+  trait Functor[F[_]] {
+    def map[A, B](fa: F[A])(f: A => B): F[B]
   }
 
+  // Functor instance for Option
+  implicit val optionFunctor: Functor[Option] = new Functor[Option] {
+    def map[A, B](fa: Option[A])(f: A => B): Option[B] = fa.map(f)
+  }
+}
+
+object RenewableControl {
   import Functor._
 
-  // Renewable plant trait with shutdown and turnOn operations
+  // Renewable plant trait with shutdown operation
   trait RenewablePlant[A] {
     def shutdown(plant: A): A
-    def turnOn(plant: A): A
   }
 
   // Renewable plant instance for Wind
-  implicit val windPlant: RenewablePlant[Wind] = new RenewablePlant[Wind] {
-    def shutdown(plant: Wind): Wind = {
-      println("Shutting down wind plant...")
-      // Additional shutdown logic can be added here
-      plant.copy(running = false)
-    }
-    def turnOn(plant: Wind): Wind = {
-      println("Turning on wind plant...")
-      // Additional turn on logic can be added here
-      plant.copy(running = true)
-    }
+  implicit val windPlant: RenewablePlant[Wind] = (plant: Wind) => {
+    println("Shutting down wind plant...")
+    // Additional shutdown logic can be added here
+    plant.copy(running = false)
   }
 
   // Renewable plant instance for Solar
-  implicit val solarPlant: RenewablePlant[Solar] = new RenewablePlant[Solar] {
-    def shutdown(plant: Solar): Solar = {
-      println("Shutting down solar plant...")
-      // Additional shutdown logic can be added here
-      plant.copy(running = false)
-    }
-    def turnOn(plant: Solar): Solar = {
-      println("Turning on solar plant...")
-      // Additional turn on logic can be added here
-      plant.copy(running = true)
-    }
+  implicit val solarPlant: RenewablePlant[Solar] = (plant: Solar) => {
+    println("Shutting down solar plant...")
+    // Additional shutdown logic can be added here
+    plant.copy(running = false)
   }
 
   // Renewable plant instance for Hydro
-  implicit val hydroPlant: RenewablePlant[Hydro] = new RenewablePlant[Hydro] {
-    def shutdown(plant: Hydro): Hydro = {
-      println("Shutting down hydro plant...")
-      // Additional shutdown logic can be added here
-      plant.copy(running = false)
-    }
-    def turnOn(plant: Hydro): Hydro = {
-      println("Turning on hydro plant...")
-      // Additional turn on logic can be added here
-      plant.copy(running = true)
-    }
+  implicit val hydroPlant: RenewablePlant[Hydro] = (plant: Hydro) => {
+    println("Shutting down hydro plant...")
+    // Additional shutdown logic can be added here
+    plant.copy(running = false)
   }
 
   // Wind plant case class
@@ -79,43 +55,47 @@ object RenewableControl {
   case class Hydro(name: String, running: Boolean = true)
 
   // Function to interact with a specific renewable plant based on user choice
-  def interactPlant[A](plant: A)(implicit renewablePlant: RenewablePlant[A], functor: Functor[Option]): Option[A] = {
+  private def interactPlant[A](plant: A)(implicit renewablePlant: RenewablePlant[A], functor: Functor[Option]): Option[A] = {
     println(s"Interacting with ${plant.getClass.getSimpleName}: ${plant.toString}")
-    println("Choose an operation:")
-    println("1. Shutdown")
-    println("2. Turn On")
-    print("Enter your choice (1 or 2): ")
+    println("Performing shutdown operation...")
+    val shutdownResult = Try(renewablePlant.shutdown(plant))
+    shutdownResult match {
+      case Success(shutdownPlant) =>
+        println("Shutdown operation successful.")
+        Some(shutdownPlant)
+      case Failure(exception) =>
+        println(s"Failed to shutdown the plant: ${exception.getMessage}")
+        None
+    }
+  }
+
+  // Run the Renewable Control application
+  def runRenewableControlApp(): Unit = {
+    // Creating wind, solar, and hydro plants
+    val windPlant = Wind("Wind Plant")
+    val solarPlant = Solar("Solar Plant")
+    val hydroPlant = Hydro("Hydro Plant")
+
+    // User interaction
+    println("Choose a renewable plant to interact with:")
+    println("1. Wind Plant")
+    println("2. Solar Plant")
+    println("3. Hydro Plant")
+    print("Enter your choice (1, 2, or 3): ")
 
     // Reading user input
     val userInput = scala.io.StdIn.readInt()
-    val updatedPlant = userInput match {
-      case 1 => renewablePlant.shutdown(plant)
-      case 2 => renewablePlant.turnOn(plant)
-      case _ => plant
-    }
-    Some(updatedPlant)
-  }
-
-  // Function to store the status of the plants in a text file
-  def storePlantStatus(wind: Wind, solar: Solar, hydro: Hydro): Unit = {
-    val writer = new PrintWriter(new File("plant_status.txt"))
-    writer.write(s"Wind Plant: ${wind.running}\n")
-    writer.write(s"Solar Plant: ${solar.running}\n")
-    writer.write(s"Hydro Plant: ${hydro.running}\n")
-    writer.close()
-  }
-
-  // Function to read the status of the plants from the text file
-  def readPlantStatus(): Option[(Wind, Solar, Hydro)] = {
-    Try {
-      val lines = Source.fromFile("plant_status.txt").getLines().toList
-      val windStatus = lines.find(_.startsWith("Wind Plant:")).map(_.split(":")(1).trim.toBoolean)
-      val solarStatus = lines.find(_.startsWith("Solar Plant:")).map(_.split(":")(1).trim.toBoolean)
-      val hydroStatus = lines.find(_.startsWith("Hydro Plant:")).map(_.split(":")(1).trim.toBoolean)
-      (windStatus, solarStatus, hydroStatus)
-    } match {
-      case Success((Some(wind), Some(solar), Some(hydro))) => Some((Wind("Wind Plant", wind), Solar("Solar Plant", solar), Hydro("Hydro Plant", hydro)))
+    val result = userInput match {
+      case 1 => interactPlant(windPlant)
+      case 2 => interactPlant(solarPlant)
+      case 3 => interactPlant(hydroPlant)
       case _ => None
+    }
+
+    // Handling result
+    result match {
+      case Some(updatedPlant) => println(s"Updated plant: $updatedPlant")
+      case None => println("Invalid choice or operation failed.")
     }
   }
 }
