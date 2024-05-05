@@ -2,35 +2,53 @@ package reps.dataanalysis
 
 import scala.annotation.tailrec
 import scala.collection.mutable
-import scala.math.floor
+
+import scala.io.Source
+import scala.util.control.NonFatal
 
 // TODO: Make functions work on also other numerical types.
 // TODO: Add error handling to functions
 object EnergyGenerationDataAnalysis {
-  //noinspection SameParameterValue
-  private def readDataCsv(fileName: String, delimiter: String): List[Array[String]] = {
-    val bufferedSource = io.Source.fromFile(fileName)
-    val dataLines = bufferedSource.getLines().toList
-    bufferedSource.close
-    dataLines.map(_.split(delimiter).map(_.trim))
+  private def readDataCsv(fileName: String, delimiter: String): Option[List[Array[String]]] = {
+    try {
+      val bufferedSource = Source.fromFile(fileName)
+      try Some(bufferedSource.getLines().toList.map(_.split(delimiter).map(_.trim)))
+      finally bufferedSource.close()
+    } catch {
+      case NonFatal(_) =>
+        println(s"Failed to read data from $fileName")
+        None
+    }
   }
 
   //noinspection SameParameterValue
-  private def extractDataCsv(data: List[Array[String]], headersIndex: Int): Array[Double] = {
+  private def extractDataCsv(data: List[Array[String]], headersIndex: Int): Option[Array[Double]] = {
+    try {
       val header = data(headersIndex)
-      var valuesIndex = header.indexOf("value")
-      if (valuesIndex == -1) valuesIndex = header.length - 1
-      data.drop(headersIndex + 1).map(_(valuesIndex).toDouble).toArray
+      val valuesIndex = header.indexOf("value")
+      if (valuesIndex == -1) None
+      else Some(data.drop(headersIndex + 1).map(_(valuesIndex).toDouble).toArray)
+    } catch {
+      case _: NumberFormatException =>
+        println("Data format error.")
+        None
+    }
   }
 
-  private def insertionSort(data: Array[Double]): Array[Double] = {
-    insertionSortHelper(data, 0)
+
+  private def insertionSort(data: Array[Double]): Option[Array[Double]] = {
+    try {
+      insertionSortHelper(data, 0)
+      Some(data)
+    } catch {
+      case NonFatal(_) =>
+        None
+    }
   }
 
   @tailrec
-  private def insertionSortHelper(data: Array[Double], currentIndex: Int): Array[Double] = {
-    if (currentIndex >= data.length) data
-    else {
+  private def insertionSortHelper(data: Array[Double], currentIndex: Int): Unit = {
+    if (currentIndex < data.length) {
       insertionSortInserter(data, currentIndex)
       insertionSortHelper(data, currentIndex + 1)
     }
@@ -46,71 +64,53 @@ object EnergyGenerationDataAnalysis {
     }
   }
 
-  private def mean(data: Array[Double]): Double = {
-    val length: Int = data.length
-    val sum = data.sum
-    sum / length.toDouble
-  }
-
-  private def median(data: Array[Double]): Double = {
-    val sortedData: Array[Double] = insertionSort(data)
-    sortedData(floor(sortedData.length / 2.0).toInt)
-  }
-
-  private def mode(data: Array[Double]): Double = {
-    modeHelper(data, mutable.HashMap[Double, Int](), 0)
-  }
-
-  @tailrec
-  private def modeHelper(data: Array[Double], elements: mutable.HashMap[Double, Int], currentIndex: Int): Double = {
-    if (currentIndex >= data.length) return elements.maxBy(_._2)._1
-
-    if (elements.contains(data(currentIndex))) {
-      elements.update(data(currentIndex), elements(data(currentIndex)) + 1)
-      modeHelper(data, elements, currentIndex + 1)
-    } else {
-      elements += (data(currentIndex) -> 1)
-      modeHelper(data, elements, currentIndex + 1)
+  private def calculateStatistics(data: Option[Array[Double]]): Option[Array[Double]] = {
+    data.flatMap { dataArray =>
+      insertionSort(dataArray).flatMap { sortedData =>
+        val results = for {
+          meanValue <- mean(sortedData)
+          medianValue <- median(sortedData)
+          modeValue <- mode(sortedData)
+          rangeValue <- range(sortedData)
+          midrangeValue <- midrange(sortedData)
+        } yield Array(meanValue, medianValue, modeValue, rangeValue, midrangeValue)
+        results
+      }
     }
   }
 
-  private def range(data: Array[Double]): Double = {
-    val sortedData: Array[Double] = insertionSort(data)
-/*    print("sortedData: ")
-    println(sortedData.mkString(", "))*/
-    sortedData.last - sortedData(0)
+
+
+  private def mean(data: Array[Double]): Option[Double] =
+    if (data.isEmpty) None else Some(data.sum / data.length)
+
+  private def median(data: Array[Double]): Option[Double] =
+    if (data.isEmpty) None else Some(data(data.length / 2))
+
+  private def mode(data: Array[Double]): Option[Double] = {
+    if (data.isEmpty) None else {
+      val freqMap = mutable.Map.empty[Double, Int]
+      data.foreach(num => freqMap(num) = freqMap.getOrElse(num, 0) + 1)
+      Some(freqMap.maxBy(_._2)._1)
+    }
   }
 
-  private def midrange(data: Array[Double]): Double = {
-    val sortedData: Array[Double] = insertionSort(data)
-    (sortedData(0) + sortedData.last) / 2.0
+  private def range(data: Array[Double]): Option[Double] =
+    if (data.isEmpty) None else Some(data.last - data.head)
+
+  private def midrange(data: Array[Double]): Option[Double] =
+    if (data.isEmpty) None else Some((data.head + data.last) / 2)
+
+  // Public method to analyze data, handling file read and processing safely
+  def analyzeData(solarDataPath: String, windDataPath: String, hydroDataPath: String): List[Option[Array[Double]]] = {
+    List(solarDataPath, windDataPath, hydroDataPath).map { path =>
+      readDataCsv(path, ",").flatMap { data =>
+        extractDataCsv(data, 0).flatMap(dataArray => calculateStatistics(Some(dataArray)))  // Adjusting the call here
+      }
+    }
   }
 
-  private def getStatistics(data: Array[Double]): Array[Double] = {
-    val dataMean: Double = mean(data)
-    val dataMedian: Double = median(data)
-    val dataMode: Double = mode(data)
-    val dataRange: Double = range(data)
-    val dataMidrange: Double = midrange(data)
 
-    val statistics: Array[Double] = Array(dataMean, dataMedian, dataMode, dataRange, dataMidrange)
-    statistics.map(stat => BigDecimal(stat).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble)
-  }
-
-  def analyzeData(solarDataPath: String, windDataPath: String, hydroDataPath: String): List[Array[Double]] = {
-    val solarData: List[Array[String]] = readDataCsv(solarDataPath, ",")
-    val windData: List[Array[String]] = readDataCsv(windDataPath, ",")
-    val hydroData: List[Array[String]] = readDataCsv(hydroDataPath, ",")
-
-    val solarValues: Array[Double] = extractDataCsv(solarData, 0)
-    val solarStatistics: Array[Double] = getStatistics(solarValues)
-
-    val windValues: Array[Double] = extractDataCsv(windData, 0)
-    val windStatistics: Array[Double] = getStatistics(windValues)
-
-    val hydroValues: Array[Double] = extractDataCsv(hydroData, 0)
-    val hydroStatistics: Array[Double] = getStatistics(hydroValues)
-
-    List(solarStatistics, windStatistics, hydroStatistics)
-  }
 }
+
+
