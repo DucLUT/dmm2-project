@@ -62,7 +62,7 @@ object Main {
         println(formattedHeader)
         val formattedRow = table.map(value => String.format("%-10s", formatter.format(value).toDouble)).mkString("\t")
         println(formattedRow)
-        println()
+        println()d
       }
     case GenerateAlerts => generateAlerts()
     case ControlRenewablePlants => runRenewableControlApp()

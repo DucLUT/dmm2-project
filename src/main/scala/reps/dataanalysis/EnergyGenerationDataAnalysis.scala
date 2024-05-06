@@ -27,8 +27,13 @@ object EnergyGenerationDataAnalysis {
     try {
       val header = data(headersIndex)
       val valuesIndex = header.indexOf("value")
-      if (valuesIndex == -1) None
-      else Some(data.drop(headersIndex + 1).map(_(valuesIndex).toDouble).toArray)
+      if (valuesIndex == -1) {
+        println("Value column not found.")
+        None
+
+      }else {
+          Some(data.drop(headersIndex + 1).map(_(valuesIndex).toDouble).toArray)
+        }
     } catch {
       case _: NumberFormatException =>
         println("Data format error.")
