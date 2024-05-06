@@ -56,12 +56,13 @@ object Main {
       val datasetNames: Array[String] = Array("Solar", "Wind", "Hydro")
 
       println()
-      analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv").zip(datasetNames).foreach { case (table, datasetName) =>
-        println(s"$datasetName Data:")
-        val formattedHeader = statisticsNames.map(name => String.format("%-10s", name)).mkString("\t")
-        println(formattedHeader)
-        val formattedRow = table.map(value => String.format("%-10s", formatter.format(value).toDouble)).mkString("\t")
-        println(formattedRow)
+      val analyzedData: List[Option[Array[Double]]] = analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv")
+      val analyzedDataFlattened: List[Array[Double]] = analyzedData.flatten
+      analyzedDataFlattened.zipWithIndex.foreach { case (data, index) =>
+        println(s"${datasetNames(index)} Data:")
+        data.zipWithIndex.foreach { case (statistic, i) =>
+          println(s"${statisticsNames(i)}: ${formatter.format(statistic)}")
+        }
         println()
       }
     case GenerateAlerts => generateAlerts()
