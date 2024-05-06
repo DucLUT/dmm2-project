@@ -90,10 +90,10 @@ object Main {
   def main(args: Array[String]): Unit = {
     val system = ActorSystem("RenewableEnergyManagementSystem")
     val dataFetches = Seq(
-        "https://data.fingrid.fi/api/datasets/191/data" -> "hydro.csv",
-        "https://data.fingrid.fi/api/datasets/248/data" -> "solar.csv",
-        "https://data.fingrid.fi/api/datasets/75/data" -> "wind.csv"
-      )
+      "https://data.fingrid.fi/api/datasets/191/data" -> "hydro.csv",
+      "https://data.fingrid.fi/api/datasets/248/data" -> "solar.csv",
+      "https://data.fingrid.fi/api/datasets/75/data" -> "wind.csv"
+    )
     val fetchFirst = Future {
       dataFetches.foreach { case (url, fileName) =>
         fetchEnergyData(url, fileName)
