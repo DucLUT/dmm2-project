@@ -9,6 +9,7 @@ import scala.language.postfixOps
 import java.text.{DecimalFormat, DecimalFormatSymbols}
 import java.util.Locale
 
+
 import reps.datacollection.EnergyGenerationDataCollection.fetchEnergyData
 import reps.views.PowerPlantView.choice
 import reps.dataanalysis.EnergyGenerationDataAnalysis.analyzeData
