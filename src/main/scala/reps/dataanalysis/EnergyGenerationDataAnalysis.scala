@@ -97,25 +97,28 @@ object EnergyGenerationDataAnalysis {
     if (data.isEmpty) None else Some(data.sum / data.length.toDouble)
 
   // TODO: Redo error handling on median without changing its format
-  private def median(data: Array[Double]): Double = {
-    val sortedData: Array[Double] = insertionSort(data)
-    sortedData(floor(sortedData.length / 2.0).toInt)
+  private def median(data: Array[Double]): Option[Double] = {
+    insertionSort(data).map { sortedData =>
+      sortedData(floor(sortedData.length / 2.0).toInt)
+    }
   }
 
   // TODO: Redo error handling on mode and modeHelper without changing their format
-  private def mode(data: Array[Double]): Double = {
-    modeHelper(data, mutable.HashMap[Double, Int](), 0)
+  private def mode(data: Array[Double]): Option[Double] = {
+    if (data.isEmpty) None
+    else Some(modeHelper(data, mutable.HashMap[Double, Int](), 0))
   }
 
   @tailrec
   private def modeHelper(data: Array[Double], elements: mutable.HashMap[Double, Int], currentIndex: Int): Double = {
-    if (currentIndex >= data.length) return elements.maxBy(_._2)._1
-
-    if (elements.contains(data(currentIndex))) {
-      elements.update(data(currentIndex), elements(data(currentIndex)) + 1)
-      modeHelper(data, elements, currentIndex + 1)
+    if (currentIndex >= data.length) {
+      elements.maxByOption(_._2).map(_._1).getOrElse(data.head)
     } else {
-      elements += (data(currentIndex) -> 1)
+      val currentElement = data(currentIndex)
+      elements.updateWith(currentElement) {
+        case Some(count) => Some(count + 1)
+        case None => Some(1)
+      }
       modeHelper(data, elements, currentIndex + 1)
     }
   }
