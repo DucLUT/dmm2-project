@@ -100,8 +100,15 @@ object EnergyGenerationDataAnalysis {
   }
 
   // Returns the mean of the data array, or None if the array is empty.
-  private def mean(data: Array[Double]): Option[Double] =
-    if (data.isEmpty) None else Some(data.sum / data.length.toDouble)
+  // Utilizes type parameterization to handle different numeric types.
+  private def mean[T : Numeric](data: Array[T]): Option[Double] = {
+    if (data.isEmpty) None
+    else {
+      val num = implicitly[Numeric[T]]
+      val sum = data.sum
+      Some(num.toDouble(sum) / data.length)
+    }
+  }
 
   // Returns the median of the data array, or None if the array is empty.
   // Sorts the data array using the insertion sort algorithm and calculates the median.
