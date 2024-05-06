@@ -198,7 +198,6 @@ object PowerPlantView {
     println("2. Wind")
     println("3. Hydro")
     println("4. All")
-    println("5. Last 24 hours data for all plants")
     print("Enter your choice: ")
 
     scala.io.StdIn.readInt() match {
@@ -236,18 +235,6 @@ object PowerPlantView {
         displayPlantData("Solar", "data/solar.csv", Some("timestamp"))
         displayPlantData("Wind", "data/wind.csv", Some("timestamp"))
         displayPlantData("Hydro", "data/hydro.csv", Some("timestamp"))
-      case 5 =>
-        println("Last 24 hours data for all plants:")
-        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
-        val solarFileName = "data/solar.csv"
-        val windFileName = "data/wind.csv"
-        val hydroFileName = "data/hydro.csv"
-        //        val filteredSolarData = formatTimestamps(filterLast24Hours(CSVReader.open(new File(solarFileName)).all(), dateFormatter), dateFormatter)
-        //        val filteredWindData = formatTimestamps(filterLast24Hours(CSVReader.open(new File(windFileName)).all(), dateFormatter), dateFormatter)
-        //        val filteredHydroData = formatTimestamps(filterLast24Hours(CSVReader.open(new File(hydroFileName)).all(), dateFormatter), dateFormatter)
-        displayPlantData("Solar", solarFileName, Some("timestamp"))
-        displayPlantData("Wind", windFileName, Some("timestamp"))
-        displayPlantData("Hydro", hydroFileName, Some("timestamp"))
 
       case _ => println("Invalid choice")
     }
