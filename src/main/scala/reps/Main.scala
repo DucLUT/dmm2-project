@@ -8,7 +8,7 @@ import scala.annotation.tailrec
 import scala.language.postfixOps
 import java.text.{DecimalFormat, DecimalFormatSymbols}
 import java.util.Locale
-
+import reps.control.RenewableControl.RenewablePlant._
 
 import reps.datacollection.EnergyGenerationDataCollection.fetchEnergyData
 import reps.views.PowerPlantView.choice
