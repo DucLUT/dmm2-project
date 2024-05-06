@@ -119,9 +119,9 @@ object PowerPlantView {
         val solarFileName = "data/solar.csv"
         val windFileName = "data/wind.csv"
         val hydroFileName = "data/hydro.csv"
-        val filteredSolarData = formatTimestamps(filterLast24Hours(CSVReader.open(new File(solarFileName)).all(), dateFormatter), dateFormatter)
-        val filteredWindData = formatTimestamps(filterLast24Hours(CSVReader.open(new File(windFileName)).all(), dateFormatter), dateFormatter)
-        val filteredHydroData = formatTimestamps(filterLast24Hours(CSVReader.open(new File(hydroFileName)).all(), dateFormatter), dateFormatter)
+//        val filteredSolarData = formatTimestamps(filterLast24Hours(CSVReader.open(new File(solarFileName)).all(), dateFormatter), dateFormatter)
+//        val filteredWindData = formatTimestamps(filterLast24Hours(CSVReader.open(new File(windFileName)).all(), dateFormatter), dateFormatter)
+//        val filteredHydroData = formatTimestamps(filterLast24Hours(CSVReader.open(new File(hydroFileName)).all(), dateFormatter), dateFormatter)
         displayPlantData("Solar", solarFileName, Some("timestamp"))
         displayPlantData("Wind", windFileName, Some("timestamp"))
         displayPlantData("Hydro", hydroFileName, Some("timestamp"))
