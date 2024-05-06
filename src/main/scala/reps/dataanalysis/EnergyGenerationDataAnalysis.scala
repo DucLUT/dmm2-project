@@ -9,6 +9,7 @@ import scala.util.control.NonFatal
 // TODO: Make functions work on also other numerical types.
 // TODO: Add error handling to functions
 object EnergyGenerationDataAnalysis {
+  //noinspection SameParameterValue
   private def readDataCsv(fileName: String, delimiter: String): Option[List[Array[String]]] = {
     try {
       val bufferedSource = Source.fromFile(fileName)

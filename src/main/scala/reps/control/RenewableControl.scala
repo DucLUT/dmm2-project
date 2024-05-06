@@ -83,7 +83,7 @@ object RenewableControl {
   case class Hydro(name: String, running: Boolean = true) extends Plant
 
   // Function to interact with a specific renewable plant based on user choice
-  def interactPlant[A <: Plant](plant: A)(implicit renewablePlant: RenewablePlant[A], functor: Functor[Option]): Option[A] = {
+  private def interactPlant[A <: Plant](plant: A)(implicit renewablePlant: RenewablePlant[A], functor: Functor[Option]): Option[A] = {
     println(s"Interacting with ${plant.getClass.getSimpleName}: ${plant.toString}")
 
     // Determine available operations based on the current status
@@ -108,7 +108,7 @@ object RenewableControl {
   }
 
   // Function to read the status of the plants from a text file
-  private def readPlantStatusFromFile(): Option[(Boolean, Boolean, Boolean)] = {
+  def readPlantStatusFromFile(): Option[(Boolean, Boolean, Boolean)] = {
     Try {
       val source = Source.fromFile("plant_status.txt")
       val lines = source.getLines().toList

@@ -1,5 +1,5 @@
 package reps.datacollection
-import scala.util.{Try, Success, Failure}
+
 import java.io.File
 import java.net.{HttpURLConnection, URL}
 import java.io.BufferedReader
@@ -9,6 +9,7 @@ import org.json4s._
 import org.json4s.native.JsonMethods._
 import scala.language.postfixOps
 import scala.io.Source
+
 // Duc Duong
 // Mattias Slotte
 // Mengshi Qi
@@ -71,7 +72,7 @@ object EnergyGenerationDataCollection {
 
   private def processResponse(response: String, fileName: String): Option[Unit] = {
       try {
-        val json = parse(response.toString)
+        val json = parse(response)
         val data = (json \ "data").extract[List[JValue]]
         val filePath = s"data/$fileName"
 
