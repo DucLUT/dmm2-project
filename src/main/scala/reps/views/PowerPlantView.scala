@@ -43,12 +43,13 @@ object PowerPlantView {
           }.getOrElse {
             // Print warning message for parsing error
             println(s"Warning: Failed to parse timestamp in row: $row")
-            false // Skip the row with invalid timestamp
+            // Skip the row with invalid timestamp
+            false
           }
         }
       }
-      println("Filtered Results:")
-      filteredData.foreach(row => println(row.mkString("\t")))
+/*      println("Filtered Results:")
+      filteredData.foreach(row => println(row.mkString("\t")))*/
       Some(filteredData)
     } match {
       case Success(value) => value
@@ -72,8 +73,8 @@ object PowerPlantView {
             false
         }
       }
-      println("Search Results:")
-      searchData.foreach(row => println(row.mkString("\t")))
+/*      println("Search Results:")
+      searchData.foreach(row => println(row.mkString("\t")))*/
       Some(searchData)
     } match {
       case Success(value) => value
@@ -103,8 +104,6 @@ object PowerPlantView {
     }
     formattedHeader :: formattedData
   }.toOption
-
-
 
   //The displayData function reads the data from the given file and displays it in a tabular format.
   // The sortBy parameter is an optional parameter that specifies the column to sort the data by.
@@ -152,6 +151,17 @@ object PowerPlantView {
       }
 
       sortedData.foreach { sorted =>
+        // Display rows with formatted timestamps
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
+        println("Sorted Results:")
+        println(sorted.head.mkString("\t"))
+        formatTimestamps(sorted, dateFormatter).foreach { formatted =>
+          // Print data rows only
+          formatted.tail.foreach(row => println(row.mkString("\t")))
+        }
+      }
+
+/*      sortedData.foreach { sorted =>
         // Display headers
         val headers = sorted.head.mkString("\t")
         println(headers)
@@ -160,10 +170,9 @@ object PowerPlantView {
         formatTimestamps(sorted.tail, dateFormatter).foreach { formatted =>
           formatted.foreach(row => println(row.mkString("\t")))
         }
-      }
+      }*/
     }
   }
-
 
   private def displayPlantData(plantName: String, fileName: String, sortBy: Option[String]): Unit = {
     println(s"$plantName Data:")
