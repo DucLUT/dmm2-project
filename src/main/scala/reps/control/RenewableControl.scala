@@ -36,7 +36,7 @@ object RenewableControl {
   // Hydro plant case class
   case class Hydro(name: String, running: Boolean = true, orientation: Int = 0) extends Plant
 
-  object Wind {
+  private object Wind {
     implicit val windPlant: RenewablePlant[Wind] = new RenewablePlant[Wind] {
       def shutdown(plant: Wind): Wind = {
         println("Shutting down wind plant...")
@@ -59,7 +59,7 @@ object RenewableControl {
     def energyCapacity(plant: Wind): Double = 100000000000.0 // example value
   }
 
-  object Solar {
+  private object Solar {
     implicit val solarPlant: RenewablePlant[Solar] = new RenewablePlant[Solar] {
       def shutdown(plant: Solar): Solar = {
         println("Shutting down solar plant...")
@@ -82,7 +82,7 @@ object RenewableControl {
     def energyCapacity(plant: Solar): Double = 50000000000.0 // example value
   }
 
-  object Hydro {
+  private object Hydro {
     implicit val hydroPlant: RenewablePlant[Hydro] = new RenewablePlant[Hydro] {
       def shutdown(plant: Hydro): Hydro = {
         println("Shutting down hydro plant...")
@@ -156,7 +156,7 @@ object RenewableControl {
     writer.close()
   }
 
-  def calculateSumFromCSV(fileName: String): Double = {
+  private def calculateSumFromCSV(fileName: String): Double = {
     val source = Source.fromFile(fileName)
     val lines = source.getLines().toList
     source.close()
@@ -185,7 +185,7 @@ object RenewableControl {
       case 1 => RenewablePlant.interactPlant(windPlant)
       case 2 => RenewablePlant.interactPlant(solarPlant)
       case 3 => RenewablePlant.interactPlant(hydroPlant)
-      case 4 => {
+      case 4 =>
         val windSum = calculateSumFromCSV("data/wind.csv")
         val solarSum = calculateSumFromCSV("data/solar.csv")
         val hydroSum = calculateSumFromCSV("data/hydro.csv")
@@ -216,8 +216,7 @@ object RenewableControl {
         } else {
           None
         }
-      }
-      case 5 => {
+      case 5 =>
         println("Choose a plant to rotate:")
         println("1. Wind Plant")
         println("2. Solar Plant")
@@ -228,7 +227,6 @@ object RenewableControl {
           case 2 => Some(Solar.solarPlant.rotate(solarPlant, 30)) // Assuming a default rotation of 30 degrees
           case _ => None
         }
-      }
       case _ => None
     }
 

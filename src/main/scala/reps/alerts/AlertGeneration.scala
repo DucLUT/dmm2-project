@@ -8,6 +8,7 @@ import reps.control.RenewableControl.readPlantStatusFromFile
 // Mengshi Qi
 
 object AlertGeneration {
+  // Generate alerts based on the analyzed data
   def generateAlerts(): Unit = {
     val analyzedData: List[Option[Array[Double]]] = analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv")
     val alertData: List[Array[Double]] = analyzedData.flatten
@@ -21,6 +22,7 @@ object AlertGeneration {
     val windData: Array[Double] = alertData(1)
     val hydroData: Array[Double] = alertData(2)
 
+    // Thresholds for average energy generation, can be adjusted based on the expected average
     val solarAverageThreshold: Double = 100
     val windAverageThreshHold: Double = 800
     val hydroAverageThreshHold: Double = 1000

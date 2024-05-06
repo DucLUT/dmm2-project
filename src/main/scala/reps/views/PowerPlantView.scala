@@ -1,14 +1,11 @@
 package reps.views
-import scala.util.Try
 import com.github.tototoshi.csv._
 
 import java.io.File
-import java.time.{LocalDateTime, ZoneId}
-import java.time.format.{DateTimeFormatter, DateTimeParseException}
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.time.LocalDate
-import scala.util.Success
-import scala.util.Failure
+import java.time.{LocalDate, LocalDateTime, ZoneId}
+import scala.util.{Failure, Success, Try}
 
 object PowerPlantView {
   //The filterLast24Hours function takes a list of lists of strings and a DateTimeFormatter as input.
@@ -68,7 +65,7 @@ object PowerPlantView {
           timestamp.toLocalDate.isEqual(date)
         } match {
           case Success(value) => value
-          case Failure(e) =>
+          case Failure(_) =>
             println(s"Failed to parse date: ${row.head}")
             false
         }
@@ -78,7 +75,7 @@ object PowerPlantView {
       Some(searchData)
     } match {
       case Success(value) => value
-      case Failure(e) =>
+      case Failure(_) =>
         println(s"Failed to parse input date: $dateString")
         None
     }

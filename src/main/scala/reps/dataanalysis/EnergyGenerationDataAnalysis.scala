@@ -10,11 +10,11 @@ object EnergyGenerationDataAnalysis {
   // Reads data from a CSV file, by specifying the file name and the delimiter and
   // reading the data into a buffered source and returning the lines of the data
   // as a list of arrays of strings, wrapped in an Option for error handling.
+  // Function is curried to allow for partial application of the delimiter.
   //noinspection SameParameterValue
-  private def readDataCsv(fileName: String, delimiter: String): Option[List[Array[String]]] = {
+  private def readDataCsv(fileName: String)(delimiter: String): Option[List[Array[String]]] = {
     try {
       val bufferedSource = Source.fromFile(fileName)
-      // Extract lines, convert to list and split by delimiter and trim the values using maps.
       try Some(bufferedSource.getLines().toList.map(_.split(delimiter).map(_.trim)))
       finally bufferedSource.close()
     } catch {
@@ -141,8 +141,11 @@ object EnergyGenerationDataAnalysis {
   // Analyzes the energy generation data from the specified paths for solar, wind, and hydro data.
   // Returns a list of options containing the statistics for each energy generation method, wrapped in an Option for error handling.
   def analyzeData(solarDataPath: String, windDataPath: String, hydroDataPath: String): List[Option[Array[Double]]] = {
+    // Partial application of curried function to read CSV data with comma delimiter.
+    val readCsvWithComma = readDataCsv(_: String)(delimiter = ",")
     List(solarDataPath, windDataPath, hydroDataPath).map { path =>
-      readDataCsv(path, ",").flatMap { data =>
+      // Read the data from the CSV file, extract the data, and calculate the statistics.
+      readCsvWithComma(path).flatMap { data =>
         extractDataCsv(data, 0).flatMap(dataArray => calculateStatistics(Some(dataArray)))
       }
     }
