@@ -6,6 +6,10 @@ import scala.io.Source
 import scala.util.control.NonFatal
 import scala.math.floor
 
+//Duc Duong
+//Mattias Slotte
+//Mengshi Qi
+
 object EnergyGenerationDataAnalysis {
   // Reads data from a CSV file, by specifying the file name and the delimiter and
   // reading the data into a buffered source and returning the lines of the data

@@ -4,6 +4,10 @@ import scala.io.Source
 import scala.util.{Try, Success, Failure}
 import java.io.{File, PrintWriter}
 
+//Duc Duong
+//Mattias Slotte
+//Mengshi Qi
+
 object Functor {
   // Functor trait with map function
   trait Functor[F[_]] {

@@ -7,6 +7,10 @@ import java.time.temporal.ChronoUnit
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 import scala.util.{Failure, Success, Try}
 
+//Duc Duong
+//Mattias Slotte
+//Mengshi Qi
+
 object PowerPlantView {
   //The filterLast24Hours function takes a list of lists of strings and a DateTimeFormatter as input.
   // It filters out any rows that do not have exactly three columns of data and attempts
