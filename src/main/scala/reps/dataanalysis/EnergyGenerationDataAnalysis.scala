@@ -77,7 +77,9 @@ object EnergyGenerationDataAnalysis {
     }
   }
 
-  //
+  // Calculates the statistics of the data array, including mean, median, mode, range, and midrange.
+  // Returns an array of the calculated statistics, wrapped in an Option for error handling.
+  // The flatMap is used to chain the calculations together, and the yield keyword is used to return the results.
   private def calculateStatistics(data: Option[Array[Double]]): Option[Array[Double]] = {
     data.flatMap { dataArray =>
       insertionSort(dataArray).flatMap { sortedData =>
@@ -93,25 +95,30 @@ object EnergyGenerationDataAnalysis {
     }
   }
 
+  // Returns the mean of the data array, or None if the array is empty.
   private def mean(data: Array[Double]): Option[Double] =
     if (data.isEmpty) None else Some(data.sum / data.length.toDouble)
 
-  // TODO: Redo error handling on median without changing its format
+  // Returns the median of the data array, or None if the array is empty.
+  // Sorts the data array using the insertion sort algorithm and calculates the median.
   private def median(data: Array[Double]): Option[Double] = {
     insertionSort(data).map { sortedData =>
       sortedData(floor(sortedData.length / 2.0).toInt)
     }
   }
 
-  // TODO: Redo error handling on mode and modeHelper without changing their format
+  // Uses the modeHelper function to calculate the mode of the data array.
+  // Returns the mode of the data array, or None if the array is empty.
   private def mode(data: Array[Double]): Option[Double] = {
     if (data.isEmpty) None
     else Some(modeHelper(data, mutable.HashMap[Double, Int](), 0))
   }
 
+  // Helper function to calculate the mode of the data array using a mutable HashMap.
   @tailrec
   private def modeHelper(data: Array[Double], elements: mutable.HashMap[Double, Int], currentIndex: Int): Double = {
     if (currentIndex >= data.length) {
+      // Return the element with the highest count, or the first element if all counts are 1
       elements.maxByOption(_._2).map(_._1).getOrElse(data.head)
     } else {
       val currentElement = data(currentIndex)
@@ -123,13 +130,16 @@ object EnergyGenerationDataAnalysis {
     }
   }
 
+  // Returns the range of the data array, or None if the array is empty.
   private def range(data: Array[Double]): Option[Double] =
     if (data.isEmpty) None else Some(data.last - data.head)
 
+  // Returns the midrange of the data array, or None if the array is empty.
   private def midrange(data: Array[Double]): Option[Double] =
     if (data.isEmpty) None else Some((data.head + data.last) / 2)
 
-  // Public method to analyze data, handling file read and processing safely
+  // Analyzes the energy generation data from the specified paths for solar, wind, and hydro data.
+  // Returns a list of options containing the statistics for each energy generation method, wrapped in an Option for error handling.
   def analyzeData(solarDataPath: String, windDataPath: String, hydroDataPath: String): List[Option[Array[Double]]] = {
     List(solarDataPath, windDataPath, hydroDataPath).map { path =>
       readDataCsv(path, ",").flatMap { data =>
