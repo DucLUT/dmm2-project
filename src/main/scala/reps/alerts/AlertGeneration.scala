@@ -12,6 +12,11 @@ object AlertGeneration {
     val analyzedData: List[Option[Array[Double]]] = analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv")
     val alertData: List[Array[Double]] = analyzedData.flatten
 
+    if (alertData.size < 3) {
+      println("Error: Insufficient data to generate alerts.")
+      return
+    }
+
     val solarData: Array[Double] = alertData.head
     val windData: Array[Double] = alertData(1)
     val hydroData: Array[Double] = alertData(2)
