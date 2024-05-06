@@ -2,17 +2,19 @@ package reps.dataanalysis
 
 import scala.annotation.tailrec
 import scala.collection.mutable
-
 import scala.io.Source
 import scala.util.control.NonFatal
+import scala.math.floor
 
-// TODO: Make functions work on also other numerical types.
-// TODO: Add error handling to functions
 object EnergyGenerationDataAnalysis {
+  // Reads data from a CSV file, by specifying the file name and the delimiter and
+  // reading the data into a buffered source and returning the lines of the data
+  // as a list of arrays of strings, wrapped in an Option for error handling.
   //noinspection SameParameterValue
   private def readDataCsv(fileName: String, delimiter: String): Option[List[Array[String]]] = {
     try {
       val bufferedSource = Source.fromFile(fileName)
+      // Extract lines, convert to list and split by delimiter and trim the values using maps.
       try Some(bufferedSource.getLines().toList.map(_.split(delimiter).map(_.trim)))
       finally bufferedSource.close()
     } catch {
@@ -22,6 +24,7 @@ object EnergyGenerationDataAnalysis {
     }
   }
 
+  // Converts the string data into doubles, and removes the headers at headersIndex.
   //noinspection SameParameterValue
   private def extractDataCsv(data: List[Array[String]], headersIndex: Int): Option[Array[Double]] = {
     try {
@@ -32,6 +35,8 @@ object EnergyGenerationDataAnalysis {
         None
 
       }else {
+          // Uses drop to drop the header row and map to convert the values to doubles
+          // And finally converts to an array.
           Some(data.drop(headersIndex + 1).map(_(valuesIndex).toDouble).toArray)
         }
     } catch {
@@ -41,7 +46,7 @@ object EnergyGenerationDataAnalysis {
     }
   }
 
-
+  // Insertion sort algorithm using a recursive helper function to sort the data array.
   private def insertionSort(data: Array[Double]): Option[Array[Double]] = {
     try {
       insertionSortHelper(data, 0)
@@ -52,6 +57,7 @@ object EnergyGenerationDataAnalysis {
     }
   }
 
+  // Helper function to sort the data array using the insertion sort algorithm recursively.
   @tailrec
   private def insertionSortHelper(data: Array[Double], currentIndex: Int): Unit = {
     if (currentIndex < data.length) {
@@ -60,6 +66,7 @@ object EnergyGenerationDataAnalysis {
     }
   }
 
+  // Inserts the current element at the correct position in the sorted part of the array using recursion.
   @tailrec
   private def insertionSortInserter(data: Array[Double], currentIndex: Int): Unit = {
     if (currentIndex > 0 && data(currentIndex - 1) > data(currentIndex)) {
@@ -70,6 +77,7 @@ object EnergyGenerationDataAnalysis {
     }
   }
 
+  //
   private def calculateStatistics(data: Option[Array[Double]]): Option[Array[Double]] = {
     data.flatMap { dataArray =>
       insertionSort(dataArray).flatMap { sortedData =>
@@ -85,19 +93,30 @@ object EnergyGenerationDataAnalysis {
     }
   }
 
-
-
   private def mean(data: Array[Double]): Option[Double] =
-    if (data.isEmpty) None else Some(data.sum / data.length)
+    if (data.isEmpty) None else Some(data.sum / data.length.toDouble)
 
-  private def median(data: Array[Double]): Option[Double] =
-    if (data.isEmpty) None else Some(data(data.length / 2))
+  // TODO: Redo error handling on median without changing its format
+  private def median(data: Array[Double]): Double = {
+    val sortedData: Array[Double] = insertionSort(data)
+    sortedData(floor(sortedData.length / 2.0).toInt)
+  }
 
-  private def mode(data: Array[Double]): Option[Double] = {
-    if (data.isEmpty) None else {
-      val freqMap = mutable.Map.empty[Double, Int]
-      data.foreach(num => freqMap(num) = freqMap.getOrElse(num, 0) + 1)
-      Some(freqMap.maxBy(_._2)._1)
+  // TODO: Redo error handling on mode and modeHelper without changing their format
+  private def mode(data: Array[Double]): Double = {
+    modeHelper(data, mutable.HashMap[Double, Int](), 0)
+  }
+
+  @tailrec
+  private def modeHelper(data: Array[Double], elements: mutable.HashMap[Double, Int], currentIndex: Int): Double = {
+    if (currentIndex >= data.length) return elements.maxBy(_._2)._1
+
+    if (elements.contains(data(currentIndex))) {
+      elements.update(data(currentIndex), elements(data(currentIndex)) + 1)
+      modeHelper(data, elements, currentIndex + 1)
+    } else {
+      elements += (data(currentIndex) -> 1)
+      modeHelper(data, elements, currentIndex + 1)
     }
   }
 
@@ -111,12 +130,8 @@ object EnergyGenerationDataAnalysis {
   def analyzeData(solarDataPath: String, windDataPath: String, hydroDataPath: String): List[Option[Array[Double]]] = {
     List(solarDataPath, windDataPath, hydroDataPath).map { path =>
       readDataCsv(path, ",").flatMap { data =>
-        extractDataCsv(data, 0).flatMap(dataArray => calculateStatistics(Some(dataArray)))  // Adjusting the call here
+        extractDataCsv(data, 0).flatMap(dataArray => calculateStatistics(Some(dataArray)))
       }
     }
   }
-
-
 }
-
-
