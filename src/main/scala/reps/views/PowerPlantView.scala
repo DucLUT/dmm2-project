@@ -3,9 +3,12 @@ import scala.util.Try
 import com.github.tototoshi.csv._
 
 import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, ZoneId}
+import java.time.format.{DateTimeFormatter, DateTimeParseException}
 import java.time.temporal.ChronoUnit
+import java.time.LocalDate
+import scala.util.Success
+import scala.util.Failure
 
 object PowerPlantView {
   //The filterLast24Hours function takes a list of lists of strings and a DateTimeFormatter as input.
@@ -22,6 +25,64 @@ object PowerPlantView {
     header :: tail.sortBy(row => row.last.toDouble)
   }.toOption
 
+  // Filter data based on time period
+  private def filterByTimePeriod(data: List[List[String]], amount: Long, period: ChronoUnit): Option[List[List[String]]] = {
+    Try {
+      val now = LocalDateTime.now(ZoneId.of("UTC"))
+      val startOfPeriod = now.minus(amount, period)
+      val header :: tail = data
+      val filteredData = header :: tail.filter { row =>
+        if (row.headOption.contains("startTime")) {
+          // Skip header row
+          false
+        } else {
+          Try {
+            val timestamp = LocalDateTime.parse(row.head, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX"))
+            // Check if the timestamp is after the specified period from the current time
+            timestamp.isAfter(startOfPeriod) && timestamp.isBefore(now)
+          }.getOrElse {
+            // Print warning message for parsing error
+            println(s"Warning: Failed to parse timestamp in row: $row")
+            false // Skip the row with invalid timestamp
+          }
+        }
+      }
+      println("Filtered Results:")
+      filteredData.foreach(row => println(row.mkString("\t")))
+      Some(filteredData)
+    } match {
+      case Success(value) => value
+      case Failure(_) => None
+    }
+  }
+
+  // Allows the user to search for data by date, if the date is in the correct format (dd/MM/yyyy).
+  private def searchByDate(data: List[List[String]], dateString: String): Option[List[List[String]]] = {
+    Try {
+      val date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+      val header :: tail = data
+      val searchData = header :: tail.filter { row =>
+        Try {
+          val timestamp = LocalDateTime.parse(row.head, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX"))
+          timestamp.toLocalDate.isEqual(date)
+        } match {
+          case Success(value) => value
+          case Failure(e) =>
+            println(s"Failed to parse date: ${row.head}")
+            false
+        }
+      }
+      println("Search Results:")
+      searchData.foreach(row => println(row.mkString("\t")))
+      Some(searchData)
+    } match {
+      case Success(value) => value
+      case Failure(e) =>
+        println(s"Failed to parse input date: $dateString")
+        None
+    }
+  }
+
   //the formatTimestamps function takes a list of lists of strings and a DateTimeFormatter as input.
   // It formats the timestamps in the data using the provided DateTimeFormatter and returns the formatted data.
   // The function first extracts the header row from the data and updates the first two columns with empty strings.
@@ -36,7 +97,8 @@ object PowerPlantView {
         row.updated(0, LocalDateTime.parse(row.head, dateFormatter).format(DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm a")))
           .updated(1, LocalDateTime.parse(row(1), dateFormatter).format(DateTimeFormatter.ofPattern("yyyy-MM-dd h:mm a")))
       } catch {
-        case _: Throwable => row // If parsing fails, return the row as is
+        // If parsing fails, return the row as is
+        case _: Throwable => row
       }
     }
     formattedHeader :: formattedData
@@ -59,6 +121,33 @@ object PowerPlantView {
       val sortedData = sortBy match {
         case Some("timestamp") => sortByTimestamp(data)
         case Some("value") => sortByValue(data)
+        case Some("search") =>
+          print("Enter the date to search (dd/MM/yyyy): ")
+          val dateString = scala.io.StdIn.readLine()
+          searchByDate(data, dateString) match {
+            case Some(value) => Some(value)
+            case None =>
+              println("Error: Date must be in the format dd/MM/yyyy")
+              None
+          }
+        case Some("filter") =>
+          println("Filter options:")
+          println("1. Last 24 hours")
+          println("2. Last 7 days")
+          println("3. Last 30 days")
+          print("Enter your filter choice: ")
+          val period = scala.io.StdIn.readInt() match {
+            case 1 => Some((24, ChronoUnit.HOURS))
+            case 2 => Some((7, ChronoUnit.DAYS))
+            case 3 => Some((1, ChronoUnit.MONTHS))
+            case _ => None
+          }
+          period.flatMap(p => filterByTimePeriod(data, p._1, p._2)) match {
+            case Some(value) => Some(value)
+            case None =>
+              println("Error: Invalid time period")
+              None
+          }
         case _ => Some(data)
       }
 
@@ -85,6 +174,8 @@ object PowerPlantView {
     println("Sorting options:")
     println("1. Sort by timestamp")
     println("2. Sort by value")
+    println("3. Search by date")
+    println("4. Filter by time period")
     print("Enter your sorting choice: ")
   }
 
@@ -107,6 +198,8 @@ object PowerPlantView {
         val sortBy = scala.io.StdIn.readInt() match {
           case 1 => Some("timestamp")
           case 2 => Some("value")
+          case 3 => Some("search")
+          case 4 => Some("filter")
           case _ => None
         }
         displayPlantData("Solar", "data/solar.csv", sortBy)
@@ -115,6 +208,8 @@ object PowerPlantView {
         val sortBy = scala.io.StdIn.readInt() match {
           case 1 => Some("timestamp")
           case 2 => Some("value")
+          case 3 => Some("search")
+          case 4 => Some("filter")
           case _ => None
         }
         displayPlantData("Wind", "data/wind.csv", sortBy)
@@ -123,6 +218,8 @@ object PowerPlantView {
         val sortBy = scala.io.StdIn.readInt() match {
           case 1 => Some("timestamp")
           case 2 => Some("value")
+          case 3 => Some("search")
+          case 4 => Some("filter")
           case _ => None
         }
         displayPlantData("Hydro", "data/hydro.csv", sortBy)
