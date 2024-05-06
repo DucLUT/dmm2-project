@@ -12,6 +12,11 @@ object AlertGeneration {
     val analyzedData: List[Option[Array[Double]]] = analyzeData("data/solar.csv", "data/wind.csv", "data/hydro.csv")
     val alertData: List[Array[Double]] = analyzedData.flatten
 
+    if (alertData.size < 3) {
+      println("Error: Insufficient data to generate alerts.")
+      return
+    }
+
     val solarData: Array[Double] = alertData.head
     val windData: Array[Double] = alertData(1)
     val hydroData: Array[Double] = alertData(2)
@@ -21,9 +26,9 @@ object AlertGeneration {
     val hydroAverageThreshHold: Double = 1000
 
     // Alert if the average energy generation is below the normal expected average
-    if (solarData(0) < solarAverageThreshold) println("Alert: Average solar energy generation is below 1000.")
-    if (windData(0) < windAverageThreshHold) println("Alert: Average wind energy generation is below 500.")
-    if (hydroData(0) < hydroAverageThreshHold) println("Alert: Average hydro energy generation is below 2000.")
+    if (solarData(0) < solarAverageThreshold) println("Alert: Average solar energy generation is below 100.")
+    if (windData(0) < windAverageThreshHold) println("Alert: Average wind energy generation is below 800.")
+    if (hydroData(0) < hydroAverageThreshHold) println("Alert: Average hydro energy generation is below 1000.")
 
     // Alert if the rate of change of energy generation is negative and above a certain threshold
     val changeOfRateThreshold: Double = -0.1

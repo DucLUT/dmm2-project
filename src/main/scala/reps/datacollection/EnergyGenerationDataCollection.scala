@@ -17,6 +17,7 @@ import scala.io.Source
 object EnergyGenerationDataCollection {
   implicit val formats: DefaultFormats.type = DefaultFormats
   // private var csvCreated = false
+  // Retrieves the API key from the .env file located within the project.
   private def getKey: Option[String] = {
     try {
       val source = Source.fromFile("src/main/scala/reps/.env")
@@ -28,6 +29,7 @@ object EnergyGenerationDataCollection {
     }
   }
 
+  // High-level function that orchestrates the fetching and processing of data.
   def fetchEnergyData(apiUrl: String, fileName: String): Option[Unit] = {
     for {
       apiKey <- getKey
@@ -37,6 +39,7 @@ object EnergyGenerationDataCollection {
   }
 
 
+  // Performs an HTTP GET request to fetch data from the provided API URL using the API key.
   private def fetchDataFromApi(apiUrl: String, ApiKey: String): Option[String] = {
   try {
     val url = new URL(apiUrl)
@@ -69,7 +72,7 @@ object EnergyGenerationDataCollection {
   }
 }
 
-
+  // Processes the JSON response from the API and writes it to a CSV file if it does not already contain the data.
   private def processResponse(response: String, fileName: String): Option[Unit] = {
       try {
         val json = parse(response)
@@ -99,7 +102,7 @@ object EnergyGenerationDataCollection {
         data.foreach { item =>
           val dataLine = s"${(item \ "startTime").extract[String]},${(item \ "endTime").extract[String]},${(item \ "value").extract[Double]}"
           if (!existingData.contains(dataLine)) {
-            csvFile.write(s"$dataLine\n") // Append new data to the file
+            csvFile.write(s"$dataLine\n")
           }
         }
 
