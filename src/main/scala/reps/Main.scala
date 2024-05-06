@@ -82,7 +82,7 @@ object Main {
       case 4 => ControlRenewablePlants
       case 5 => Exit
       case _ =>
-        println("Invalid choice. Please enter a valid option.")1
+        println("Invalid choice. Please enter a valid option.")
         getUserChoice
     }
   }
